@@ -91,12 +91,15 @@ public class PetDatabase {
                     showAllPets();
                     break;
                 case 3:
+                    searchPetsByAge();
+                    break;
+                case 4:
                     System.out.println("Program Closing");
                     break;
                 default:
                     System.out.println("Choice not valid. Please try again.");
             }
-        } while (choice != 3);
+        } while (choice != 4);
     }
 
     /*
@@ -125,7 +128,8 @@ public class PetDatabase {
     private static int getUserChoice() {
         System.out.println("Press 1 to add pets");
         System.out.println("Press 2 to show all pets");
-        System.out.println("Press 3 to exit");
+        System.out.println("Press 3 to search by pets age");
+        System.out.println("Press 4 to exit");
         // setting output to green
         System.out.printf("\u001B[32mEnter your choice: \u001B[0m");
         return scnr.nextInt();
@@ -196,6 +200,27 @@ public class PetDatabase {
             printTableRow(i, pets[i].getName(), pets[i].getAge());
         }
         printTableFooter(petCount);
+    }
+
+    /*
+     * asks for user input (age)
+     * prints header, then loops through for matching age
+     * prints row if age matches and increments row count
+     * prints footer
+     */
+    private static void searchPetsByAge() {
+        System.out.print("Enter the age to search: ");
+        int age = scnr.nextInt();
+        scnr.nextLine();
+        printTableHeader();
+        int rowCount = 0;
+        for (int i = 0; i < petCount; i++) {
+            if (pets[i].getAge() == age) {
+                printTableRow(i, pets[i].getName(), pets[i].getAge());
+                rowCount++;
+            }
+        }
+        printTableFooter(rowCount);
     }
 
     // methods to print header, row and footer
