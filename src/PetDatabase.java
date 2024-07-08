@@ -4,6 +4,7 @@
  */
 
 import java.util.Scanner;
+import java.io.PrintWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -14,6 +15,11 @@ import java.io.FileNotFoundException;
  * initializes the exception
  */
 
+class InvalidIdException extends Exception {
+    InvalidIdException(String message) {
+        super(message);
+    }
+}
 class InvalidAgeException extends Exception {
     InvalidAgeException(String message) {
         super(message);
@@ -30,6 +36,7 @@ class FullDatabaseException extends Exception {
         super(message);
     }
 }
+
 
 /*
  * Constructor method for Pet
@@ -85,21 +92,31 @@ public class PetDatabase {
             choice = getUserChoice();
             switch (choice) {
                 case 1:
-                    addPets();
-                    break;
-                case 2:
                     showAllPets();
                     break;
+                case 2:
+                    addPets();
+                    break;
                 case 3:
-                    searchPetsByAge();
+                    updatePet();
                     break;
                 case 4:
-                    System.out.println("Program Closing");
+                    removePet();
+                    break;
+                case 5:
+                    searchPetsByName();
+                    break;
+                case 6:
+                    searchPetsByAge();
+                    break;
+                case 7:
+                    System.out.println("7) Exit program");
                     break;
                 default:
                     System.out.println("Choice not valid. Please try again.");
             }
-        } while (choice != 4);
+        } while (choice != 7);
+        System.out.print("Goodbye!");
     }
 
     /*
@@ -122,14 +139,34 @@ public class PetDatabase {
     }
 
     /*
+     * opens up writer to pets.txt
+     * writes pet name and age to file
+     * prints success message
+     */
+    private static void saveDatabase() {
+        try (PrintWriter writer = new PrintWriter(filename)) {
+            for (int i = 0; i < petCount; i++) {
+                writer.println(pets[i].getName() + " " + pets[i].getAge());
+            }
+            System.out.println("Database saved successfully.");
+        } catch (FileNotFoundException e) {
+            System.out.println("Error saving database: " + e.getMessage());
+        }
+    }
+
+    /*
      * this part of the code creates a menu to the screen and is used above
      * in the switch statements
      */
     private static int getUserChoice() {
-        System.out.println("Press 1 to add pets");
-        System.out.println("Press 2 to show all pets");
-        System.out.println("Press 3 to search by pets age");
-        System.out.println("Press 4 to exit");
+        System.out.println("What would you like to do?");
+        System.out.println("1) View all pets");
+        System.out.println("2) Add more pets");
+        System.out.println("3) Update an existing pet");
+        System.out.println("4) Remove an existing pet");
+        System.out.println("5) Search pets by name");
+        System.out.println("6) Search pets by age");
+        System.out.println("7) Exit program ");
         // setting output to green
         System.out.printf("\u001B[32mEnter your choice: \u001B[0m");
         return scnr.nextInt();
@@ -142,9 +179,10 @@ public class PetDatabase {
      * uses addPet to add into database
      */
     private static void addPets() {
-        System.out.println("Enter pet name and age, type 'exit' to finish:");
+        System.out.println("add pet (name, age):");
         String line;
-        while (!(line = scnr.nextLine()).equals("exit")) {
+        int petsAddedCounter = 0;
+        while (!(line = scnr.nextLine()).equals("done")) {
             if (line.isEmpty()){
                 continue;
             }
@@ -152,12 +190,13 @@ public class PetDatabase {
             try {
                 parts = parseArgument(line);
                 addPet(parts[0], Integer.parseInt(parts[1]));
+                petsAddedCounter ++;
             } catch (InvalidArgumentException | FullDatabaseException e) {
                 System.out.println("Error adding pet: " + e.getMessage());
             }
         }
-        scnr.nextLine();
-        System.out.println("Thanks for adding pets! Back to the menu:");
+        // scnr.nextLine();
+        System.out.println(petsAddedCounter + " pets added.");
     }
 
     private static void addPet(String name, int age) throws FullDatabaseException {
@@ -173,7 +212,6 @@ public class PetDatabase {
         try {
             pets[petCount] = new Pet(name, age);
             petCount++;
-            System.out.println("Woohoo! Pet added successfully!");
         } catch (InvalidAgeException e) {
             System.out.printf("\u001B[31mError adding pet: " + e.getMessage() + "\u001B[0m");
         }
@@ -203,6 +241,38 @@ public class PetDatabase {
     }
 
     /*
+     * asks for user input and verifies it's valid
+     * if valid, removes pet and shifts everything after it "left"
+     * decrements petCount
+     * If invalid, throws exception.
+     */
+    private static void removePet() {
+        showAllPets();
+        scnr.nextLine(); // Consume newline
+        System.out.print("Enter the ID of the pet to remove: ");
+        int id = scnr.nextInt();
+
+        try {
+            if (id < 0 || id >= petCount) {
+                throw new InvalidIdException("\u001B[31mInvalid ID.\u001B[0m");
+            }
+
+            String petBeingRemoved = pets[id].getName();
+            int removedPetAge = pets[id].getAge();
+
+            for (int i = id; i < petCount - 1; i++) {
+                pets[i] = pets[i + 1];
+            }
+
+            petCount--;
+            System.out.printf("\u001B[32m%s %d is removed.\u001B[0m\n", petBeingRemoved, removedPetAge);
+
+        } catch (InvalidIdException e) {
+            System.out.printf("\u001B[31mError removing pet: " + e.getMessage() + "\u001B[0m");
+        }
+    }
+
+    /*
      * asks for user input (age)
      * prints header, then loops through for matching age
      * prints row if age matches and increments row count
@@ -221,6 +291,62 @@ public class PetDatabase {
             }
         }
         printTableFooter(rowCount);
+    }
+    /*
+     * function to search pets by name
+     * Ignoring case in leiu of some error handling
+     * printing header/footer and filling with any rows that match
+     */
+    private static void searchPetsByName() {
+        scnr.nextLine();
+        System.out.println("Enter a name to search: ");
+        String name = scnr.nextLine();
+        printTableHeader();
+        int rowCount = 0;
+        for (int i = 0; i < petCount; i++) {
+            if (pets[i].getName().equalsIgnoreCase(name)) {
+                printTableRow(i, pets[i].getName(), pets[i].getAge());
+                rowCount++;
+            }
+        }
+        printTableFooter(rowCount);
+    }
+    /*
+     * method to update a pet
+     * Stores old and new information so that it can be printed out at
+     * the end like the sample run asked
+     */
+    private static void updatePet(){
+        if (petCount == 0){
+            System.out.println("There aren't any pets to update!");
+            return;
+        }
+
+        showAllPets();
+        System.out.println("Enter the pet ID you came to update:");
+        int id = scnr.nextInt();
+        scnr.nextLine();
+        try {
+            if (id >= petCount || id < 0){
+                throw new InvalidIdException("\u001B[31mInvalid ID.\u001B[0m");
+            }
+            System.out.print("Enter new name: ");
+            String newName = scnr.nextLine();
+            System.out.print("Enter new age: ");
+            int newAge = scnr.nextInt();
+            scnr.nextLine();
+
+            String oldName = pets[id].getName();
+            int oldAge = pets[id].getAge();
+
+            pets[id].setName(newName);
+            pets[id].setAge(newAge);
+
+            System.out.println(oldName + " " + oldAge + " changed to " + newName + " " + newAge + ".");
+
+        } catch (InvalidIdException | InvalidAgeException e) {
+        System.out.printf("\u001B[31mError updating pet: " + e.getMessage() + "\u001B[0m");
+    }
     }
 
     // methods to print header, row and footer
