@@ -78,7 +78,7 @@ class Pet {
 
 public class PetDatabase {
     // setting variables and creating array/scanner object
-    private static final int CAPACITY = 100;
+    private static final int CAPACITY = 5;
     private static Pet[] pets = new Pet[CAPACITY];
     private static int petCount = 0;
     private static final String filename = "pets.txt";
