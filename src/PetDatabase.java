@@ -110,12 +110,16 @@ public class PetDatabase {
                     searchPetsByAge();
                     break;
                 case 7:
+                    clearDatabase();
+                    break;
+                case 8:
                     System.out.println("7) Exit program");
                     break;
                 default:
                     System.out.println("Choice not valid. Please try again.");
             }
-        } while (choice != 7);
+        } while (choice != 8);
+        saveDatabase();
         System.out.print("Goodbye!");
     }
 
@@ -166,7 +170,8 @@ public class PetDatabase {
         System.out.println("4) Remove an existing pet");
         System.out.println("5) Search pets by name");
         System.out.println("6) Search pets by age");
-        System.out.println("7) Exit program ");
+        System.out.println("7) Clear database");
+        System.out.println("8) Exit program ");
         // setting output to green
         System.out.printf("\u001B[32mEnter your choice: \u001B[0m");
         return scnr.nextInt();
@@ -345,7 +350,17 @@ public class PetDatabase {
 
         } catch (InvalidIdException | InvalidAgeException e) {
         System.out.printf("\u001B[31mError updating pet: " + e.getMessage() + "\u001B[0m");
+        }
     }
+
+    // Method to clear the pets.txt file
+    private static void clearDatabase() {
+        try (PrintWriter writer = new PrintWriter(filename)) {
+            petCount = 0;
+            System.out.println("Database file cleared successfully.");
+        } catch (FileNotFoundException e) {
+            System.out.println("Error clearing database file: " + e.getMessage());
+        }
     }
 
     // methods to print header, row and footer
