@@ -47,8 +47,8 @@ class Pet {
     private int age;
 
     Pet(String name, int age) throws InvalidAgeException {
-        if (age < 1 || age > 50) {
-            throw new InvalidAgeException("\u001B[31m" + age + " is an invalid entry\u001B[0m");
+        if (age < 0 || age > 20) {
+            throw new InvalidAgeException("\u001B[31m" + age + " is an invalid entry please enter an age 0-20\u001B[0m\n");
         }
         this.name = name;
         this.age = age;
@@ -69,8 +69,8 @@ class Pet {
 
     // also throws exception here for invalid age
     void setAge(int age) throws InvalidAgeException {
-        if (age < 1 || age > 50) {
-            throw new InvalidAgeException(age + " is an invalid entry");
+        if (age < 0 || age > 20) {
+            throw new InvalidAgeException(age + " is an invalid entry\n");
         }
         this.age = age;
     }
