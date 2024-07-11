@@ -133,7 +133,7 @@ public class PetDatabase {
                 String[] parts = parseArgument(line);
                 addPet(parts[0], Integer.parseInt(parts[1]));
             }
-        } catch (FileNotFoundException | InvalidArgumentException | FullDatabaseException e) {
+        } catch (FileNotFoundException | InvalidArgumentException | FullDatabaseException | InvalidAgeException e) {
             System.out.printf("\u001B[31mError loading database: " + e.getMessage() + "\u001B[0m");
         }
     }
@@ -191,15 +191,14 @@ public class PetDatabase {
                 parts = parseArgument(line);
                 addPet(parts[0], Integer.parseInt(parts[1]));
                 petsAddedCounter ++;
-            } catch (InvalidArgumentException | FullDatabaseException e) {
+            } catch (InvalidArgumentException | FullDatabaseException | InvalidAgeException e) {
                 System.out.println("Error adding pet: " + e.getMessage());
             }
         }
-        // scnr.nextLine();
         System.out.println(petsAddedCounter + " pets added.");
     }
 
-    private static void addPet(String name, int age) throws FullDatabaseException {
+    private static void addPet(String name, int age) throws FullDatabaseException, InvalidAgeException {
         //exception if at capacity
         if (petCount == CAPACITY) {
             throw new FullDatabaseException("\u001B[31mDatabase is full.\u001B[0m");
@@ -209,12 +208,12 @@ public class PetDatabase {
          * increments petCount
          * prints success or throws error
          */
-        try {
-            pets[petCount] = new Pet(name, age);
-            petCount++;
-        } catch (InvalidAgeException e) {
-            System.out.printf("\u001B[31mError adding pet: " + e.getMessage() + "\u001B[0m");
-        }
+       // try {
+        pets[petCount] = new Pet(name, age);
+        petCount++;
+       // } catch (InvalidAgeException e) {
+       //     System.out.printf("\u001B[31mError adding pet: " + e.getMessage() + "\u001B[0m");
+       // }
     }
 
     /*
